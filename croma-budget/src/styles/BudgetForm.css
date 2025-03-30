@@ -1,0 +1,162 @@
+.budget-form {
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  
+  input {
+    margin: 5px;
+    padding: 5px;
+    width: 100%;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  th, td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    text-align: center;
+  }
+  
+  .small-column {
+    width: 5%;
+  }
+
+  .medium-column {
+    width: 15%;
+  }
+  
+  .large-column {
+    width: 65%;
+  }
+  
+  button {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  .save-button {
+    background-color: #28a745;
+  }
+  
+  .save-button:hover {
+    background-color: #218838;
+  }
+  
+  .success-message {
+    text-align: center;
+    color: #28a745;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+
+  .dental-image {
+    text-align: center;
+    margin: 10px 0;
+  }
+  
+  .dental-image img {
+    width: 100%;  /* Ocupa toda a largura do contêiner */
+    max-width: 500px; /* Ajuste para acompanhar a largura dos campos */
+    height: auto;
+    display: block;
+    margin: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  th, td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    text-align: center;
+    white-space: nowrap; /* Evita quebra de linha inesperada */
+  }
+  
+  .small-column {
+    width: 15%;
+  }
+  
+  .medium-column {
+    width: 50%;
+  }
+  
+  input[type="number"],
+  input[type="text"] {
+    width: 95%; /* Ajuste fino para evitar que saiam da célula */
+    padding: 4px;
+    box-sizing: border-box; /* Mantém o tamanho do input dentro do container */
+  }
+
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .logo {
+    width: 50px;  /* Ajuste conforme necessário */
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px; /* Ajusta a posição para alinhar com os campos */
+  }
+
+  .dental-diagram-container {
+    position: relative;
+    width: fit-content;
+    margin: auto;
+  }
+  
+  .dental-diagram {
+    position: relative;
+  }
+  
+  #dental-image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .dental-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none; /* Impede que o canvas bloqueie a interação com a imagem */
+  }
+  
+  .note {
+    position: absolute;
+    cursor: pointer; /* Define um cursor padrão para indicar interatividade */
+  }
+
+  .note-input {
+    position: absolute;
+    background: white;
+    border: 1px solid #000;
+    padding: 2px;
+    font-size: 14px;
+  }
