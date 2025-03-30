@@ -44,20 +44,22 @@ const BudgetForm: React.FC = () => {
         localStorage.setItem("orcamentos", JSON.stringify(orcamentos));
         setSaved(true);
         alert("Orçamento salvo com sucesso!");
+        handleWhatsAppShare(); // Chamar aqui para garantir que compartilhe após o save
     };
 
-    const compartilhar = () => {
-        if (navigator.share) {
-            const texto = "Orçamento Odontológico salvo com sucesso.";
+    const handleWhatsAppShare = () => {
+        let message = `Orçamento Odontológico:\nNome: ${patientName}\nIdade: ${age}\n\nTratamentos:\n`;
+        
+        treatments.forEach((treatment, index) => {
+            message += `Nº ${index + 1}: ${treatment.name}, Valor: R$ ${treatment.price.toFixed(2)}, Quantidade: ${treatment.quantity}, Total: R$ ${(treatment.price * treatment.quantity).toFixed(2)}\n`;
+        });
+        
+        const total = calculateTotal();
+        message += `\nTotal Geral: R$ ${total}`;
 
-            navigator.share({
-                title: "Orçamento Odontológico",
-                text: texto,
-            })
-                .catch((error) => console.error("Erro ao compartilhar:", error));
-        } else {
-            alert("Compartilhamento não suportado neste navegador. Copie e cole manualmente.");
-        }
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappURL = `https://api.whatsapp.com/send?text=${encodedMessage}`;
+        window.open(whatsappURL, "_blank");
     };
 
     return (
@@ -82,7 +84,7 @@ const BudgetForm: React.FC = () => {
             />
 
             <h3>Tratamentos</h3>
-            <table>
+            <table id="budgetTable">
                 <thead>
                     <tr>
                         <th className="small-column">Nº</th>
@@ -132,7 +134,7 @@ const BudgetForm: React.FC = () => {
 
             <h3>Total: R$ {calculateTotal()}</h3>
 
-            <button className="save-button" onClick={() => { handleSave(); compartilhar(); }}>
+            <button className="save-button" onClick={handleSave}>
                 Salvar e Compartilhar
             </button>
 
