@@ -89,6 +89,31 @@ const BudgetForm: React.FC = () => {
     }
   };
 
+  const handleFileUpload = async () => {
+    const pdf = new jsPDF();
+    pdf.text("Hello world!", 10, 10);
+    const pdfOutput = pdf.output('blob'); // Obtém o PDF como um Blob
+
+    const formData = new FormData();
+    formData.append('file', pdfOutput, 'documento.pdf'); // O terceiro parâmetro é o nome arquivo
+
+    // Enviar para o servidor
+    const response = await fetch('http://localhost:3000/upload', {
+        method: 'POST',
+        body: formData,
+    });
+
+    const result = await response.json();
+    console.log('File URL:', result.fileUrl);
+
+    // Prepara o compartilhamento do link
+    navigator.share({
+        title: 'Compartilhamento de Arquivo',
+        text: 'Veja o arquivo:',
+        url: result.fileUrl,
+    }).catch(console.error);
+};
+
   return (
     <div className="budget-form">
       <div className="header-container">
