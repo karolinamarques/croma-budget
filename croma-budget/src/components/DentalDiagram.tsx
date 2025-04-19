@@ -85,9 +85,9 @@ const DentalDiagram: React.FC = () => {
     setDraggingIndex(null);
   };
 
-  const handleDoubleClick = (index: number) => {
+  const handleNoteRemove = (index: number) => {
     setNotes((prevNotes) => prevNotes.filter((_, i) => i !== index));
-  };
+};
 
   // Estilo das letras na legenda
   const letterStyles = {
@@ -135,7 +135,7 @@ const DentalDiagram: React.FC = () => {
             }}
             onMouseDown={(event) => handleDragStart(index, event)}
             onTouchStart={(event) => handleDragStart(index, event)}
-            onDoubleClick={() => handleDoubleClick(index)}
+            onDoubleClick={() => handleNoteRemove(index)}
           >
             {note.text}
           </div>

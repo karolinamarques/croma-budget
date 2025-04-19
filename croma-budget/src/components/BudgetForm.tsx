@@ -1,146 +1,173 @@
 import React, { useState } from "react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import "./../styles/BudgetForm.css";
 import DentalDiagram from "./DentalDiagram";
 
 interface Treatment {
-    name: string;
-    price: number;
-    quantity: number;
+  name: string;
+  price: number;
+  quantity: number;
 }
 
 const BudgetForm: React.FC = () => {
-    const [patientName, setPatientName] = useState("");
-    const [age, setAge] = useState<number | "">("");
-    const [treatments, setTreatments] = useState<Treatment[]>([{ name: "", price: 0, quantity: 1 }]);
-    const [saved, setSaved] = useState(false);
-    const orcamentos = [
-        { nome: "Paciente 1", valor: "R$ 500,00" },
-        { nome: "Paciente 2", valor: "R$ 700,00" },
-    ];
+  const [patientName, setPatientName] = useState("");
+  const [age, setAge] = useState<number | "">("");
+  const [treatments, setTreatments] = useState<Treatment[]>([{ name: "", price: 0, quantity: 1 }]);
+  const [saved, setSaved] = useState(false);
+  const orcamentos = [
+    { nome: "Paciente 1", valor: "R$ 500,00" },
+    { nome: "Paciente 2", valor: "R$ 700,00" },
+  ];
 
-    const handleAddTreatment = () => {
-        setTreatments([...treatments, { name: "", price: 0, quantity: 1 }]);
-    };
+  const handleAddTreatment = () => {
+    setTreatments([...treatments, { name: "", price: 0, quantity: 1 }]);
+  };
 
-    const handleTreatmentChange = <K extends keyof Treatment>(
-        index: number,
-        field: K,
-        value: Treatment[K]
-    ) => {
-        const newTreatments = [...treatments];
-        newTreatments[index][field] = value;
-        setTreatments(newTreatments);
-    };
+  const handleTreatmentChange = <K extends keyof Treatment>(
+    index: number,
+    field: K,
+    value: Treatment[K]
+  ) => {
+    const newTreatments = [...treatments];
+    newTreatments[index][field] = value;
+    setTreatments(newTreatments);
+  };
 
-    const handleDeleteTreatment = (index: number) => {
-        setTreatments(treatments.filter((_, i) => i !== index));
-    };
+  const handleDeleteTreatment = (index: number) => {
+    setTreatments(treatments.filter((_, i) => i !== index));
+  };
 
-    const calculateTotal = () => {
-        return treatments.reduce((total, t) => total + t.price * t.quantity, 0).toFixed(2);
-    };
+  const calculateTotal = () => {
+    return treatments.reduce((total, t) => total + t.price * t.quantity, 0).toFixed(2);
+  };
 
-    const handleSave = () => {
-        localStorage.setItem("orcamentos", JSON.stringify(orcamentos));
-        setSaved(true);
-        alert("Orçamento salvo com sucesso!");
-        handleWhatsAppShare(); // Chamar aqui para garantir que compartilhe após o save
-    };
+  const handleSaveAndShare = async () => {
+    try {
+      // Salvar orçamento no localStorage
+      localStorage.setItem("orcamentos", JSON.stringify(orcamentos));
+      setSaved(true);
+      alert("Orçamento salvo com sucesso!");
 
-    const handleWhatsAppShare = () => {
-        let message = `Orçamento Odontológico:\nNome: ${patientName}\nIdade: ${age}\n\nTratamentos:\n`;
-        
-        treatments.forEach((treatment, index) => {
-            message += `Nº ${index + 1}: ${treatment.name}, Valor: R$ ${treatment.price.toFixed(2)}, Quantidade: ${treatment.quantity}, Total: R$ ${(treatment.price * treatment.quantity).toFixed(2)}\n`;
-        });
-        
-        const total = calculateTotal();
-        message += `\nTotal Geral: R$ ${total}`;
+      // Gerar PDF
+      const input = document.querySelector(".budget-form") as HTMLElement;
 
-        const encodedMessage = encodeURIComponent(message);
-        const whatsappURL = `https://api.whatsapp.com/send?text=${encodedMessage}`;
-        window.open(whatsappURL, "_blank");
-    };
+      if (input) {
+        const canvas = await html2canvas(input);
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF();
+        pdf.addImage(
+          imgData,
+          "PNG",
+          0,
+          0,
+          pdf.internal.pageSize.getWidth(),
+          pdf.internal.pageSize.getHeight()
+        );
+        const pdfName = `Orcamento_${patientName}.pdf`;
+        pdf.save(pdfName);
 
-    return (
-        <div className="budget-form">
-            <div className="header-container">
-                <h2>Orçamento Odontológico</h2>
-                <img src="/logo-croma.png" alt="Logo" className="logo" />
-            </div>
+        // Compartilhar o arquivo gerado
+        compartilhar(pdfName);  
+      }
+    } catch (error) {
+      console.error("Erro ao salvar e compartilhar:", error);
+      alert("Ocorreu um erro ao tentar salvar e compartilhar o arquivo.");
+    }
+  };
 
-            <DentalDiagram />
+  const compartilhar = (pdfName: string) => {
+    if (navigator.share) {
+      navigator.share({
+        title: "Orçamento Odontológico",
+        text: "Orçamento Odontológico salvo!",
+        // A API atual não suporta arquivos, isto é uma simplificação do exemplo.
+      })
+      .catch((error) => console.error("Erro ao compartilhar:", error));
+    } else {
+      alert("Compartilhamento não suportado neste navegador.");
+    }
+  };
 
-            <label>Nome:</label>
-            <input type="text" value={patientName} onChange={(e) => setPatientName(e.target.value)} />
+  return (
+    <div className="budget-form">
+      <div className="header-container">
+        <h2>Orçamento Odontológico</h2>
+        <img src="/logo-croma.png" alt="Logo" className="logo" />
+      </div>
 
-            <label>Idade:</label>
-            <input
-                type="number"
-                min="1"
-                max="120"
-                value={age}
-                onChange={(e) => setAge(Number(e.target.value))}
-            />
+      <DentalDiagram />
 
-            <h3>Tratamentos</h3>
-            <table id="budgetTable">
-                <thead>
-                    <tr>
-                        <th className="small-column">Nº</th>
-                        <th className="large-column">Tratamento</th>
-                        <th className="medium-column">Valor</th>
-                        <th className="medium-column">Total</th>
-                        <th className="small-column">Deletar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {treatments.map((treatment, index) => (
-                        <tr key={index}>
-                            <td>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    value={treatment.quantity}
-                                    onChange={(e) => handleTreatmentChange(index, "quantity", Number(e.target.value))}
-                                />
-                            </td>
-                            <td>
-                                <input
-                                    type="text"
-                                    placeholder="Tratamento"
-                                    value={treatment.name}
-                                    onChange={(e) => handleTreatmentChange(index, "name", e.target.value)}
-                                />
-                            </td>
-                            <td>
-                                <input
-                                    type="number"
-                                    placeholder="Valor"
-                                    value={treatment.price}
-                                    onChange={(e) => handleTreatmentChange(index, "price", Number(e.target.value))}
-                                />
-                            </td>
-                            <td>R$ {(treatment.price * treatment.quantity).toFixed(2)}</td>
-                            <td>
-                                <button onClick={() => handleDeleteTreatment(index)}>X</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+      <label>Nome:</label>
+      <input type="text" value={patientName} onChange={(e) => setPatientName(e.target.value)} />
 
-            <button onClick={handleAddTreatment}>Adicionar Tratamento</button>
+      <label>Idade:</label>
+      <input
+        type="number"
+        min="1"
+        max="120"
+        value={age}
+        onChange={(e) => setAge(Number(e.target.value))}
+      />
 
-            <h3>Total: R$ {calculateTotal()}</h3>
+      <h3>Tratamentos</h3>
+      <table>
+        <thead>
+          <tr>
+            <th className="small-column">Nº</th>
+            <th className="large-column">Tratamento</th>
+            <th className="medium-column">Valor</th>
+            <th className="medium-column">Total</th>
+            <th className="small-column">Deletar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {treatments.map((treatment, index) => (
+            <tr key={index}>
+              <td>
+                <input
+                  type="number"
+                  min="1"
+                  value={treatment.quantity}
+                  onChange={(e) => handleTreatmentChange(index, "quantity", Number(e.target.value))}
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  placeholder="Tratamento"
+                  value={treatment.name}
+                  onChange={(e) => handleTreatmentChange(index, "name", e.target.value)}
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  placeholder="Valor"
+                  value={treatment.price}
+                  onChange={(e) => handleTreatmentChange(index, "price", Number(e.target.value))}
+                />
+              </td>
+              <td>R$ {(treatment.price * treatment.quantity).toFixed(2)}</td>
+              <td>
+                <button onClick={() => handleDeleteTreatment(index)}>X</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
-            <button className="save-button" onClick={handleSave}>
-                Salvar e Compartilhar
-            </button>
+      <button onClick={handleAddTreatment}>Adicionar Tratamento</button>
 
-            {saved && <p className="success-message">Orçamento compartilhado!</p>}
-        </div>
-    );
+      <h3>Total: R$ {calculateTotal()}</h3>
+
+      <button className="save-button" onClick={handleSaveAndShare}>
+        Salvar e Compartilhar
+      </button>
+
+      {saved && <p className="success-message">Orçamento compartilhado!</p>}
+    </div>
+  );
 };
 
 export default BudgetForm;
